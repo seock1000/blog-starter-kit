@@ -87,4 +87,76 @@ describe('StructuredData Component', () => {
     expect(data.contentLocation.address.addressLocality).toBe('Tokyo')
     expect(data.contentLocation.geo).toBeUndefined()
   })
+
+  describe('BlogPosting Schema Completeness (US-2)', () => {
+    it('should include all required BlogPosting fields for non-geo posts', () => {
+      const { container } = render(<StructuredData post={basePost} />)
+      const script = container.querySelector('script[type="application/ld+json"]')
+      const data = JSON.parse(script?.textContent || '{}')
+      
+      // Required BlogPosting fields
+      expect(data['@context']).toBe('https://schema.org')
+      expect(data['@type']).toBe('BlogPosting')
+      expect(data.headline).toBe('Test Post')
+      expect(data.datePublished).toBe('2025-11-25')
+      expect(data.dateModified).toBe('2025-11-25')
+      expect(data.author).toBeDefined()
+      expect(data.author['@type']).toBe('Person')
+      expect(data.author.name).toBe('Test Author')
+      expect(data.description).toBe('Test excerpt')
+      expect(data.image).toBeDefined()
+    })
+
+    it('should include all required BlogPosting fields for geo-tagged posts', () => {
+      const postWithLocation: Post = {
+        ...basePost,
+        location: {
+          city: 'Seoul',
+          country: 'South Korea',
+        },
+      }
+
+      const { container } = render(<StructuredData post={postWithLocation} />)
+      const script = container.querySelector('script[type="application/ld+json"]')
+      const data = JSON.parse(script?.textContent || '{}')
+      
+      // Required BlogPosting fields
+      expect(data['@context']).toBe('https://schema.org')
+      expect(data['@type']).toBe('BlogPosting')
+      expect(data.headline).toBeDefined()
+      expect(data.datePublished).toBeDefined()
+      expect(data.author).toBeDefined()
+      expect(data.description).toBeDefined()
+      
+      // Location-specific fields
+      expect(data.contentLocation).toBeDefined()
+    })
+
+    it('should handle posts with minimal information', () => {
+      const minimalPost: Post = {
+        slug: 'minimal-post',
+        title: 'Minimal Post',
+        date: '2025-11-25',
+        excerpt: 'Minimal excerpt',
+        coverImage: '',
+        author: {
+          name: 'Author Name',
+        },
+        ogImage: {
+          url: '',
+        },
+        content: 'Content',
+      }
+
+      const { container } = render(<StructuredData post={minimalPost} />)
+      const script = container.querySelector('script[type="application/ld+json"]')
+      const data = JSON.parse(script?.textContent || '{}')
+      
+      // Should still have required fields
+      expect(data['@type']).toBe('BlogPosting')
+      expect(data.headline).toBe('Minimal Post')
+      expect(data.author.name).toBe('Author Name')
+      expect(data.description).toBe('Minimal excerpt')
+    })
+  })
 })
