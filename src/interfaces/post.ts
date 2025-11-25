@@ -1,4 +1,5 @@
 import { type Author } from "./author";
+import type Location from "./location";
 
 export type Post = {
   slug: string;
@@ -12,4 +13,5 @@ export type Post = {
   };
   content: string;
   preview?: boolean;
+  location?: Location;
 };
