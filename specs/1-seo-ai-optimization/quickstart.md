@@ -1,59 +1,122 @@
-# Quickstart: Geo-targeting and SEO
+# Quickstart: SEO and AI Engine Optimization
 
-This guide explains how to use the new geo-targeting and SEO features.
+This document provides a quick reference for using the new SEO features in your blog.
 
-## Adding Location to a Post
+## 🚀 Quick Start
 
-To associate a geographic location with a blog post, add a `location` field to the post's Markdown frontmatter.
+### 1. Add Location to Your Posts
 
-**Format**: The location should be a string in the format `"City, Country"`.
+Add a `location` field to your post's frontmatter in `/_posts`:
 
-### Example
+```markdown
+---
+title: 'Exploring the Culture of Tokyo'
+date: '2025-11-25'
+location: 'Tokyo, Japan'
+author:
+  name: 'Jane Doe'
+excerpt: 'Discover the rich cultural heritage...'
+---
 
-1.  Open or create a Markdown file in the `/_posts` directory.
-2.  Add the `location` key to the frontmatter:
+Your content here...
+```
 
-    ```markdown
-    ---
-    title: 'A Visit to the Eiffel Tower'
-    excerpt: 'An amazing experience in the heart of Paris.'
-    date: '2025-12-01T10:00:00.000Z'
-    author:
-      name: 'Alex Doe'
-    location: 'Paris, France'
-    ---
+**Supported Formats:**
+- `City, Country` → Full location (e.g., "Seoul, South Korea")
+- `City` → City only (country defaults to "Global")
+- No location field → Post is considered global content
 
-    The content of your post goes here.
-    ```
+### 2. Build and Verify
 
-3.  Save the file.
+Build your site to generate the sitemap and structured data:
 
-When the site is rebuilt, the post will now include structured data identifying its location as Paris, France.
+```bash
+npm run build
+npm start
+```
 
-## Verifying the Changes
+The following are generated automatically:
+- **Structured Data**: BlogPosting JSON-LD on every post page
+- **Sitemap**: `public/sitemap.xml` with all posts
 
-1.  Run the development server (`npm run dev`).
-2.  Navigate to the page for the post you just edited.
-3.  Open your browser's developer tools and inspect the page source (`View Page Source`).
-4.  Search for `"@type":"BlogPosting"`. You should find a `<script type="application/ld+json">` block.
-5.  Within that block, you will see the location information:
+### 3. Validate SEO Implementation
 
-    ```json
-    "location": {
-      "@type": "Place",
-      "name": "Paris, France"
-    }
-    ```
+**Validate Structured Data:**
+1. Visit your post page (e.g., `http://localhost:3000/posts/your-post`)
+2. View page source and look for `<script type="application/ld+json">`
+3. Verify the structure includes BlogPosting with location (if specified)
+4. Test with [Google Rich Results Test](https://search.google.com/test/rich-results)
 
-## Global Posts
+**Check Sitemap:**
+- Visit `http://localhost:3000/sitemap.xml`
+- Ensure all posts are listed with correct URLs and dates
 
-If you do not add a `location` field to the frontmatter, the post will be marked as "global".
+## 📍 Advanced: Location Input Component
 
-### Example
+If you're building an admin or authoring interface, use the `LocationInput` component for easy location selection:
 
-```json
-"location": {
-  "@type": "Place",
-  "name": "Global"
+```tsx
+import { LocationInput } from '@/app/_components/location-input'
+
+function PostEditor() {
+  return (
+    <LocationInput 
+      initialValue="Seoul, South Korea"
+      onLocationSelect={(location) => {
+        console.log('Selected:', location)
+        // { city: 'Seoul', country: 'South Korea', latitude?: number, longitude?: number }
+      }}
+    />
+  )
 }
 ```
+
+**Features:**
+- Google Maps Places API autocomplete (requires API key)
+- Falls back to manual entry if no API key
+- Returns structured location object with optional coordinates
+
+**Setup:**
+```bash
+# Copy the example file
+cp .env.local.example .env.local
+
+# Add your Google Maps API key
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_api_key_here
+```
+
+## 🧪 Testing
+
+Run the test suite to verify everything works:
+
+```bash
+# Run all tests
+npm test
+
+# Run specific test file
+npm test -- location-input
+
+# Watch mode for development
+npm run test:watch
+```
+
+## 📈 SEO Best Practices
+
+1. **Use Descriptive Titles**: Your post title becomes the `headline` in structured data
+2. **Add Excerpts**: The excerpt becomes the `description` in structured data
+3. **Use Quality Images**: Cover images are included in the structured data
+4. **Be Specific with Locations**: Use recognizable city and country names
+5. **Keep Content Fresh**: The `dateModified` field helps search engines understand content updates
+
+## 🔍 Troubleshooting
+
+**Issue**: Location not appearing in structured data
+- **Solution**: Check frontmatter format (must be `location: 'City, Country'`)
+
+**Issue**: Sitemap not generated
+- **Solution**: Ensure `npm run build` completes successfully; check `public/sitemap.xml`
+
+**Issue**: Google Maps autocomplete not working
+- **Solution**: Verify `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` is set and valid
+
+For more details, see the full specification in `spec.md`.
